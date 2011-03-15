@@ -22,6 +22,17 @@ class Hash
     merger = proc {|key,v1,v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2 }
     self.merge!(second, &merger)
   end
+  
+  # {:a => 1, :b => {:c => 2, :f => 3, :d => 4}}.include?({:b => {:c => 2, :f => 3}}) #=> true
+  def deep_include?(sub_hash)
+    sub_hash.keys.all? do |key|
+      self.has_key?(key) && if sub_hash[key].is_a?(Hash)
+        self[key].is_a?(Hash) && self[key].deep_include?(sub_hash[key])
+      else
+        self[key] == sub_hash[key]
+      end
+    end
+  end
 
   def nested_hash(array)
     node = self
