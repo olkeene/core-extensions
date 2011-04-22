@@ -47,6 +47,20 @@ class Hash
     deep_merge!(nested_hash)
   end
 
+#  {:a => {:b => 1}}.deep_value_valid?(:a, Hash) #=> true
+#  {:a => {:b => 1, :c => 2}}.deep_value_valid?({:a => {:b => 1}}, Integer, :in => (1..15).to_a) #=> true
+  def deep_value_valid?(object_or_hash, class_name, options={})
+    return self.is_a?(class_name) unless object_or_hash.is_a?(Hash)
+
+    return false unless self.has_key?(object_or_hash.keys[0])
+    return self[object_or_hash.keys[0]].deep_value_valid?(object_or_hash.values[0], class_name, options) if object_or_hash.values[0].is_a?(Hash)
+
+    return options[:in].include?(object_or_hash.values[0]) if options[:in]
+    return object_or_hash.values[0] =~ options[:format]    if options[:format]
+
+    self[object_or_hash.keys[0]].is_a?(class_name)
+  end
+
   def to_params
     params = ''
     stack = []
