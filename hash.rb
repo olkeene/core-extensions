@@ -100,4 +100,19 @@ class Hash
       new_hash
     end
   end
+
+  # {:x => 1, :y => 2, :z => {:a => {:k => "needle"}}}.recursive_find_by_key(:k) # => "needle"
+  def recursive_find_by_key(key)
+    stack = [ self ]
+
+    while (to_search = stack.pop)
+      to_search.each do | k,v |
+        return v if (k == key)
+
+        if(v.respond_to?(:recursive_find_by_key))
+          stack << v
+        end
+      end
+    end
+  end
 end
